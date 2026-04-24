@@ -3,6 +3,7 @@ import {
   Area,
   AreaChart,
   CartesianGrid,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -234,9 +235,13 @@ export function ProductSalesTrend({ product, onBack }: ProductSalesTrendProps) {
   const unitsYMin = Math.max(0, Math.floor(unitsMin * 0.92));
   const unitsYMax = Math.ceil(unitsMax * 1.08);
 
+  const classAverageConv = Math.round((product.conversionRate - product.conversionVsClass) * 10) / 10;
+
   const convValues = conversionChartData.map((d) => d.conversionRate);
-  const convMin = Math.max(0, Math.floor((Math.min(...convValues) - 0.5) * 10) / 10);
-  const convMax = Math.ceil((Math.max(...convValues) + 0.4) * 10) / 10;
+  const convRawMin = Math.min(...convValues, classAverageConv);
+  const convRawMax = Math.max(...convValues, classAverageConv);
+  const convMin = Math.max(0, Math.floor((convRawMin - 0.5) * 10) / 10);
+  const convMax = Math.ceil((convRawMax + 0.4) * 10) / 10;
 
   const xAxisInterval = days <= 7 ? 0 : days <= 30 ? 4 : 8;
 
@@ -519,15 +524,66 @@ export function ProductSalesTrend({ product, onBack }: ProductSalesTrendProps) {
           >
             Conversion rate over time
           </p>
-          <p
+          <div
             style={{
-              fontSize: "var(--partnerhome-font-size-500)",
-              color: "var(--partnerhome-text-color-secondary, #646266)",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "12px",
               margin: "0 0 12px 0",
             }}
           >
-            {timeframeLabel(timeframe)}
-          </p>
+            <span
+              style={{
+                fontSize: "var(--partnerhome-font-size-500)",
+                color: "var(--partnerhome-text-color-secondary, #646266)",
+              }}
+            >
+              {timeframeLabel(timeframe)}
+            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", flexWrap: "wrap" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span
+                  aria-hidden
+                  style={{
+                    display: "inline-block",
+                    width: "14px",
+                    height: "2px",
+                    backgroundColor: "#1A6BB0",
+                    borderRadius: "1px",
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: "var(--partnerhome-font-size-500)",
+                    color: "var(--partnerhome-text-color-secondary, #646266)",
+                  }}
+                >
+                  This product
+                </span>
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                <span
+                  aria-hidden
+                  style={{
+                    display: "inline-block",
+                    width: "14px",
+                    height: "0",
+                    borderTop: "1.5px dashed #C13A3A",
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: "var(--partnerhome-font-size-500)",
+                    color: "var(--partnerhome-text-color-secondary, #646266)",
+                  }}
+                >
+                  Class average ({classAverageConv.toFixed(1)}%)
+                </span>
+              </div>
+            </div>
+          </div>
           <div style={{ width: "100%", height: 220 }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={conversionChartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
@@ -565,6 +621,20 @@ export function ProductSalesTrend({ product, onBack }: ProductSalesTrendProps) {
                   fill="rgba(26, 107, 176, 0.1)"
                   dot={false}
                   activeDot={{ r: 4, stroke: "#1A6BB0", strokeWidth: 2, fill: "#fff" }}
+                />
+                <ReferenceLine
+                  y={classAverageConv}
+                  stroke="#C13A3A"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 4"
+                  ifOverflow="extendDomain"
+                  label={{
+                    value: `Class avg ${classAverageConv.toFixed(1)}%`,
+                    position: "insideTopRight",
+                    fill: "#C13A3A",
+                    fontSize: 11,
+                    fontFamily: "inherit",
+                  }}
                 />
               </AreaChart>
             </ResponsiveContainer>

@@ -4,6 +4,7 @@ import { EditIcon } from "./icons";
 import { TableRow } from "./TableRow";
 import { ProductSalesTrend, type Product as WorkspaceProductRow } from "./ProductSalesTrend";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import svgPaths from "../../imports/svg-0nid74xoow";
 
 const RECOMMENDATION_INFO_TOOLTIP =
   "Suggested starting values based on similar patterns and context. You stay in control and can update them before approval.";
@@ -448,10 +449,10 @@ const WORKSPACE_INITIAL_PRODUCTS: WorkspaceProductRow[] = [
   {
     name: "Rhea Area Rug 5'x7'",
     asin: "B09RHE7890",
-    impressionsPercentile: 18,
+    impressionsPercentile: 14,
     totalImpressions: 894_200,
     conversionRate: 3.1,
-    conversionVsClass: -0.4,
+    conversionVsClass: -2.1,
     unitsSold: 142,
     uniqueVisits: 3820,
     salesTrend: -12.3,
@@ -463,10 +464,10 @@ const WORKSPACE_INITIAL_PRODUCTS: WorkspaceProductRow[] = [
   {
     name: "Stainless Steel Water Bottle 32oz",
     asin: "B08ABC5678",
-    impressionsPercentile: 24,
+    impressionsPercentile: 22,
     totalImpressions: 521_400,
     conversionRate: 2.4,
-    conversionVsClass: -1.6,
+    conversionVsClass: -3.4,
     unitsSold: 87,
     uniqueVisits: 2290,
     salesTrend: -8.5,
@@ -478,10 +479,10 @@ const WORKSPACE_INITIAL_PRODUCTS: WorkspaceProductRow[] = [
   {
     name: "Organic Cotton Pillow Cases (Set of 2)",
     asin: "B07DEF9012",
-    impressionsPercentile: 52,
+    impressionsPercentile: 8,
     totalImpressions: 481_900,
     conversionRate: 1.9,
-    conversionVsClass: -2.8,
+    conversionVsClass: -4.6,
     unitsSold: 53,
     uniqueVisits: 2524,
     salesTrend: -18.7,
@@ -493,10 +494,10 @@ const WORKSPACE_INITIAL_PRODUCTS: WorkspaceProductRow[] = [
   {
     name: "LED Desk Lamp with USB Charging",
     asin: "B0AGHI3456",
-    impressionsPercentile: 31,
+    impressionsPercentile: 27,
     totalImpressions: 712_050,
     conversionRate: 2.9,
-    conversionVsClass: -0.9,
+    conversionVsClass: -2.1,
     unitsSold: 198,
     uniqueVisits: 3882,
     salesTrend: -5.2,
@@ -1142,18 +1143,59 @@ export function WorkspacePanel({ onClose, onCardCompleted }: WorkspacePanelProps
               )}
             </div>
           </div>
-          <p
+          <div
+            role="note"
             style={{
-              fontSize: "var(--partnerhome-font-size-1000)",
-              color: "#4D4A4F",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "10px",
+              padding: "12px 14px",
               margin: "0 0 var(--partnerhome-spacing-2000) 0",
-              lineHeight: "20px",
-              fontWeight: "normal",
-              maxWidth: "880px",
+              borderRadius: "var(--partnerhome-radius-base)",
+              border: "1px solid #E0D6E3",
+              backgroundColor: "#F8F2FA",
+              fontFamily: "'Lato', sans-serif",
             }}
           >
-            These products are showing weaker performance compared with similar items. Review performance details and update the list if needed.
-          </p>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+              style={{ flexShrink: 0, marginTop: "1px" }}
+            >
+              <path d={svgPaths.p3bab4b72} fill="url(#banner_paint0)" />
+              <path
+                d={svgPaths.p16776880}
+                fill="#F5E8FA"
+                stroke="url(#banner_paint1)"
+                strokeLinejoin="round"
+                strokeWidth="1.64074"
+              />
+              <defs>
+                <linearGradient id="banner_paint0" gradientUnits="userSpaceOnUse" x1="18.8305" x2="18.8305" y1="1.36189" y2="6.91484">
+                  <stop stopColor="#7B189F" />
+                  <stop offset="1" stopColor="#D5B9DF" />
+                </linearGradient>
+                <linearGradient id="banner_paint1" gradientUnits="userSpaceOnUse" x1="11.3383" x2="11.3383" y1="1" y2="20.4619">
+                  <stop stopColor="#7A2798" />
+                  <stop offset="1" stopColor="#DFC1EA" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "var(--partnerhome-font-size-1000)",
+                lineHeight: "20px",
+                color: "#211E22",
+                fontWeight: "normal",
+              }}
+            >
+              These products were flagged because they are converting below similar products in their class and have lower impression percentile. You can review and edit the list if needed.
+            </p>
+          </div>
 
           {/* Product table using P table components */}
           <div
@@ -1167,7 +1209,7 @@ export function WorkspacePanel({ onClose, onCardCompleted }: WorkspacePanelProps
             <table
               style={{
                 width: "100%",
-                minWidth: isUpdatingProducts ? "1192px" : "1140px",
+                minWidth: isUpdatingProducts ? "1232px" : "1180px",
                 borderCollapse: "collapse",
                 fontFamily: "var(--partnerhome-font-family-base)",
               }}
@@ -1219,9 +1261,9 @@ export function WorkspacePanel({ onClose, onCardCompleted }: WorkspacePanelProps
                   <th style={{ ...numericColumnHeaderStyle, width: "100px" }}>Inventory</th>
                   <th style={{ ...numericColumnHeaderStyle, width: "110px" }}>Sales trend</th>
                   <th style={{ ...numericColumnHeaderStyle, width: "110px" }}>Units sold</th>
-                  <th style={{ ...numericColumnHeaderStyle, width: "120px" }}>Conversion rate</th>
+                  <th style={{ ...numericColumnHeaderStyle, width: "180px" }}>Conversion rate</th>
                   <th style={{ ...numericColumnHeaderStyle, width: "120px" }}>Unique visits</th>
-                  <th style={{ ...numericColumnHeaderStyle, width: "130px" }}>Total impressions</th>
+                  <th style={{ ...numericColumnHeaderStyle, width: "150px" }}>Impression percentile</th>
                 </tr>
               </thead>
               <tbody>
@@ -1365,14 +1407,32 @@ export function WorkspacePanel({ onClose, onCardCompleted }: WorkspacePanelProps
                         padding: "0 var(--partnerhome-spacing-2000)",
                         height: "56px",
                         textAlign: "right",
-                        fontSize: "var(--partnerhome-font-size-1000)",
-                        fontWeight: "var(--partnerhome-font-weight-normal)",
-                        color: "var(--partnerhome-text-color-base)",
                         fontFamily: "var(--partnerhome-font-family-base)",
                         verticalAlign: "middle",
                       }}
                     >
-                      {product.conversionRate}%
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "2px" }}>
+                        <span
+                          style={{
+                            fontSize: "var(--partnerhome-font-size-1000)",
+                            fontWeight: "var(--partnerhome-font-weight-normal)",
+                            color: "var(--partnerhome-text-color-base)",
+                            lineHeight: "20px",
+                          }}
+                        >
+                          {product.conversionRate}%
+                        </span>
+                        <span
+                          style={{
+                            fontSize: "var(--partnerhome-font-size-500)",
+                            color: "#C13A3A",
+                            lineHeight: "16px",
+                            fontWeight: "var(--partnerhome-font-weight-normal)",
+                          }}
+                        >
+                          vs. {(product.conversionRate - product.conversionVsClass).toFixed(1)}% class average
+                        </span>
+                      </div>
                     </td>
                     <td
                       style={{
@@ -1400,7 +1460,7 @@ export function WorkspacePanel({ onClose, onCardCompleted }: WorkspacePanelProps
                         verticalAlign: "middle",
                       }}
                     >
-                      {product.totalImpressions.toLocaleString()}
+                      {product.impressionsPercentile}
                     </td>
                   </TableRow>
                 ))}
@@ -1457,18 +1517,60 @@ export function WorkspacePanel({ onClose, onCardCompleted }: WorkspacePanelProps
             </div>
           </div>
 
-          {/* Intro */}
-          <p
+          {/* Intro banner */}
+          <div
+            role="note"
             style={{
-              fontSize: "var(--partnerhome-font-size-1000)",
-              color: "#4D4A4F",
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "10px",
+              padding: "12px 14px",
               margin: "0 0 20px 0",
-              lineHeight: "20px",
-              fontWeight: "normal",
+              borderRadius: "var(--partnerhome-radius-base)",
+              border: "1px solid #E0D6E3",
+              backgroundColor: "#F8F2FA",
+              fontFamily: "'Lato', sans-serif",
             }}
           >
-            Recommended mix: a coupon to support conversion, plus a Sponsored Products campaign to boost visibility.
-          </p>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+              style={{ flexShrink: 0, marginTop: "1px" }}
+            >
+              <path d={svgPaths.p3bab4b72} fill="url(#budget_banner_paint0)" />
+              <path
+                d={svgPaths.p16776880}
+                fill="#F5E8FA"
+                stroke="url(#budget_banner_paint1)"
+                strokeLinejoin="round"
+                strokeWidth="1.64074"
+              />
+              <defs>
+                <linearGradient id="budget_banner_paint0" gradientUnits="userSpaceOnUse" x1="18.8305" x2="18.8305" y1="1.36189" y2="6.91484">
+                  <stop stopColor="#7B189F" />
+                  <stop offset="1" stopColor="#D5B9DF" />
+                </linearGradient>
+                <linearGradient id="budget_banner_paint1" gradientUnits="userSpaceOnUse" x1="11.3383" x2="11.3383" y1="1" y2="20.4619">
+                  <stop stopColor="#7A2798" />
+                  <stop offset="1" stopColor="#DFC1EA" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "var(--partnerhome-font-size-1000)",
+                lineHeight: "20px",
+                color: "#211E22",
+                fontWeight: "normal",
+              }}
+            >
+              We suggest using part of your budget for a discount coupon to encourage purchases, and run a sponsored products campaign to help more shoppers discover these products.
+            </p>
+          </div>
 
           {/* 2-column grid: Ads + Promo */}
           <div
