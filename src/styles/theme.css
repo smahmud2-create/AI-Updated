@@ -1,0 +1,571 @@
+/* ============================================
+   PARTNERHOME DESIGN SYSTEM - COMPLETE TOKEN LIBRARY
+   All design tokens for PartnerHome FigmaMake components
+   ============================================ */
+
+:root {
+  /* === PRIMITIVE COLORS (Reference only - use semantic colors below) === */
+  
+  /* Colors - White */
+  --partnerhome-white: #FFFFFF;
+
+  /* Colors - Core (Purple) */
+  --partnerhome-core-10: #F1E9F1;
+  --partnerhome-core-20: #DBC5DB;
+  --partnerhome-core-30: #AA7FAC;
+  --partnerhome-core-40: #976397;
+  --partnerhome-core-50: #7A417E;
+  --partnerhome-core-60: #66256A;
+  --partnerhome-core-70: #59205E;
+  --partnerhome-core-80: #3B153F;
+
+  /* Colors - Neutral (Grayscale) */
+  --partnerhome-neutral-10: #F5F5F5;
+  --partnerhome-neutral-20: #D1D1D6;
+  --partnerhome-neutral-30: #93939A;
+  --partnerhome-neutral-40: #777279;
+  --partnerhome-neutral-50: #646266;
+  --partnerhome-neutral-60: #4D4A4F;
+  --partnerhome-neutral-70: #363438;
+  --partnerhome-neutral-80: #211E22;
+
+  /* Colors - Sale (Red) */
+  --partnerhome-sale-10: #FCF3F6;
+  --partnerhome-sale-20: #F2D0D9;
+  --partnerhome-sale-30: #F14651;
+  --partnerhome-sale-40: #E81120;
+  --partnerhome-sale-50: #C4113F;
+  --partnerhome-sale-60: #990E35;
+  --partnerhome-sale-70: #790B33;
+  --partnerhome-sale-80: #541212;
+
+  /* Colors - Accent */
+  --partnerhome-tertiary: #F6B71D;
+  --partnerhome-shipping: #247139;
+
+  /* === SEMANTIC COLORS (Use these for component styling) === */
+  
+  /* Background Colors - Buttons */
+  --partnerhome-bg-color-button-primary: #66256A;
+  --partnerhome-bg-color-button-primary-hover: #7A417E;
+  --partnerhome-bg-color-button-secondary: #66256A;
+  --partnerhome-bg-color-button-secondary-hover: #F1E9F1;
+
+  /* Background Colors - Global */
+  --partnerhome-bg-color-global-body: #F5F5F5;
+  --partnerhome-bg-color-global-body-tint: #F5F5F5;
+  --partnerhome-bg-color-global-body-shade: #D1D1D6;
+
+  /* Background Colors - Primary */
+  --partnerhome-bg-color-primary: #66256A;
+  --partnerhome-bg-color-primary-hover: #7A417E;
+  --partnerhome-bg-color-primary-idle: #66256A;
+  --partnerhome-bg-color-primaryidle: #66256A;
+  --partnerhome-bg-color-primaryhover: #7A417E;
+  --partnerhome-bg-color-primary-active: #59205E;
+  --partnerhome-bg-color-primaryactive: #59205E;
+  --partnerhome-bg-color-primary-subtle: #E5D1EC;
+  --partnerhome-bg-color-primary-prominent: #7B189F;
+
+  /* Background Colors - Secondary */
+  --partnerhome-bg-color-secondary: #66256A;
+  --partnerhome-bg-color-secondary-hover: #7A417E;
+  --partnerhome-bg-color-secondary-idle: #FFFFFF;
+  --partnerhome-bg-color-secondaryhover: #F1E9F1;
+  --partnerhome-bg-color-secondary-active: #DBC5DB;
+  --partnerhome-bg-color-secondaryactive: #DBC5DB;
+
+  /* Background Colors - Tertiary */
+  --partnerhome-bg-color-tertiary: #DBC5DB;
+  --partnerhome-bg-color-tertiary-idle: #FFFFFF;
+  --partnerhome-bg-color-tertiaryidle: #FFFFFF;
+  --partnerhome-bg-color-tertiary-hover: #F5F5F5;
+  --partnerhome-bg-color-tertiaryhover: #F5F5F5;
+  --partnerhome-bg-color-tertiary-active: #D1D1D6;
+  --partnerhome-bg-color-tertiaryactive: #D1D1D6;
+
+  /* Background Colors - Base/Surface */
+  --partnerhome-bg-color-base: #FFFFFF;
+  --partnerhome-bg-color-basetransparent: transparent;
+
+  /* Background Colors - Inverse */
+  --partnerhome-bg-color-inverse: #4D4A4F;
+  --partnerhome-bg-color-inverseprominent: #211E22;
+  --partnerhome-bg-color-inversesubtle: #D1D1D6;
+
+  /* Background Colors - Status */
+  --partnerhome-bg-color-positive: #245728;
+  --partnerhome-bg-color-positiveidle: #245728;
+  --partnerhome-bg-color-positivehover: #247139;
+  --partnerhome-bg-color-positiveactive: #234414;
+  --partnerhome-bg-color-positive-subtle: #B3DBB3;
+  --partnerhome-bg-color-positive-prominent: #245728;
+
+  --partnerhome-bg-color-negative: #9B1000;
+  --partnerhome-bg-color-negativeidle: #9B1000;
+  --partnerhome-bg-color-negativehover: #C90000;
+  --partnerhome-bg-color-negativeactive: #6F2119;
+  --partnerhome-bg-color-negative-subtle: #F8C4C4;
+  --partnerhome-bg-color-negative-prominent: #9B1000;
+
+  --partnerhome-bg-color-sale: #C4113F;
+  --partnerhome-bg-color-saleidle: #9B1000;
+  --partnerhome-bg-color-salehover: #C90000;
+  --partnerhome-bg-color-sale-hover: #990E35;
+  --partnerhome-bg-color-saleactive: #6F1919;
+  --partnerhome-bg-color-salesubtle: #FACECE;
+  --partnerhome-bg-color-sale-subtle: #F2D0D9;
+  --partnerhome-bg-color-sale-prominent: #990E35;
+
+  --partnerhome-bg-color-warning: #BD6B00;
+  --partnerhome-bg-color-warningidle: #BD5500;
+  --partnerhome-bg-color-warninghover: #F06C00;
+  --partnerhome-bg-color-warningactive: #994500;
+  --partnerhome-bg-color-warning-subtle: #FFC494;
+  --partnerhome-bg-color-warning-prominent: #BD5500;
+
+  /* Background Colors - Neutral */
+  --partnerhome-bg-color-neutral: #4D4A4F;
+  --partnerhome-bg-color-neutralsubtle: #D1D1D6;
+  --partnerhome-bg-color-neutral-subtle: #D1D1D6;
+  --partnerhome-bg-color-neutral-prominent: #4D4A4F;
+
+  /* Background Colors - Accent */
+  --partnerhome-bg-color-accent: #F6B71D;
+
+  /* Background Colors - Disabled */
+  --partnerhome-bg-color-disabled: #93939A;
+  --partnerhome-bg-color-disabledsubtle: #F5F5F5;
+
+  /* Background Colors - Shipping */
+  --partnerhome-bg-color-speedshipping: #EDF7EC;
+  --partnerhome-bg-color-premiumshipping: #F1E9F1;
+
+  /* Text Colors - Base */
+  --partnerhome-text-color-base: #211E22;
+  --partnerhome-text-color-base-subtle: #4D4A4F;
+  --partnerhome-text-color-basesubtle: #4D4A4F;
+  --partnerhome-text-color-inverse: #FFFFFF;
+  --partnerhome-text-color-primary-inverse: #FFFFFF;
+
+  /* Text Colors - Primary */
+  --partnerhome-text-color-primary: #66256A;
+  --partnerhome-text-color-primary-hover: #3B153F;
+  --partnerhome-text-color-primaryidle: #66256A;
+  --partnerhome-text-color-primaryhover: #7A417E;
+  --partnerhome-text-color-primaryactive: #59205E;
+
+  /* Text Colors - Secondary */
+  --partnerhome-text-color-secondary: #66256A;
+  --partnerhome-text-color-secondaryidle: #4D4A4F;
+  --partnerhome-text-color-secondaryhover: #7A417E;
+  --partnerhome-text-color-secondaryactive: #59205E;
+
+  /* Text Colors - Tertiary */
+  --partnerhome-text-color-tertiaryidle: #FFFFFF;
+  --partnerhome-text-color-tertiaryhover: #F1E9F1;
+  --partnerhome-text-color-tertiaryactive: #DBC5DB;
+
+  /* Text Colors - Status */
+  --partnerhome-text-color-positive: #245728;
+  --partnerhome-text-color-positiveidle: #245728;
+  --partnerhome-text-color-positivehover: #247139;
+  --partnerhome-text-color-positiveactive: #234414;
+
+  --partnerhome-text-color-negative: #9B1000;
+  --partnerhome-text-color-negativeidle: #9B1000;
+  --partnerhome-text-color-negativehover: #C90000;
+  --partnerhome-text-color-negativeactive: #6F2119;
+
+  --partnerhome-text-color-sale: #9B1000;
+  --partnerhome-text-color-saleidle: #9B1000;
+  --partnerhome-text-color-salehover: #C90000;
+  --partnerhome-text-color-saleactive: #6F1919;
+
+  --partnerhome-text-color-warning: #BD5500;
+  --partnerhome-text-color-warningidle: #BD5500;
+  --partnerhome-text-color-warninghover: #F06C00;
+  --partnerhome-text-color-warningactive: #994500;
+
+  /* Text Colors - Other */
+  --partnerhome-text-color-accent: #F6B71D;
+  --partnerhome-text-color-disabled: #93939A;
+  --partnerhome-text-color-disabledsubtle: #F5F5F5;
+  --partnerhome-text-color-error: #C4113F;
+  --partnerhome-text-color-extralight: #D1D1D6;
+  --partnerhome-text-color-speedshipping: #247139;
+  --partnerhome-text-color-premiumshipping: #66256A;
+
+  /* Border Colors - Base */
+  --partnerhome-border-color-base: #D1D1D6;
+  --partnerhome-border-color-inverse: #FFFFFF;
+  --partnerhome-border-color-global-body: #F5F5F5;
+  --partnerhome-border-color-global-body-tint: #F5F5F5;
+  --partnerhome-border-color-light-medium-grey: #93939A;
+  --partnerhome-border-color-lighter-grey: #F5F5F5;
+
+  /* Border Colors - Primary */
+  --partnerhome-border-color-primary: #66256A;
+  --partnerhome-border-color-primary-hover: #3B153F;
+  --partnerhome-border-color-primaryidle: #66256A;
+  --partnerhome-border-color-primaryhover: #7A417E;
+  --partnerhome-border-color-primaryactive: #59205E;
+
+  /* Border Colors - Secondary */
+  --partnerhome-border-color-secondary: #211E22;
+  --partnerhome-border-color-secondaryidle: #4D4A4F;
+  --partnerhome-border-color-secondaryhover: #7A417E;
+  --partnerhome-border-color-secondary-hover: #66256A;
+  --partnerhome-border-color-secondaryactive: #59205E;
+  --partnerhome-border-color-secondary-active: #66256A;
+  --partnerhome-border-color-secondarysubtle: #777279;
+
+  /* Border Colors - Tertiary */
+  --partnerhome-border-color-tertiary: #211E22;
+  --partnerhome-border-color-tertiaryidle: #4D4A4F;
+  --partnerhome-border-color-tertiaryidlesubtle: #93939A;
+  --partnerhome-border-color-tertiaryhover: #646266;
+  --partnerhome-border-color-tertiaryhoversubtle: #D1D1D6;
+  --partnerhome-border-color-tertiary-hover-subtle: #D1D1D6;
+  --partnerhome-border-color-tertiaryactive: #363438;
+  --partnerhome-border-color-tertiaryactivesubtle: #D1D1D6;
+  --partnerhome-border-color-tertiary-active-subtle: #D1D1D6;
+
+  /* Border Colors - Status */
+  --partnerhome-border-color-positive: #245728;
+  --partnerhome-border-color-positiveidle: #245728;
+  --partnerhome-border-color-positivehover: #247139;
+  --partnerhome-border-color-positiveactive: #234414;
+
+  --partnerhome-border-color-negative: #9B1000;
+  --partnerhome-border-color-negativeidle: #9B1000;
+  --partnerhome-border-color-negativehover: #C90000;
+  --partnerhome-border-color-negativeactive: #6F2119;
+
+  --partnerhome-border-color-sale: #C4113F;
+  --partnerhome-border-color-warning: #BD5500;
+  --partnerhome-border-color-warningidle: #BD5500;
+  --partnerhome-border-color-warninghover: #F06C00;
+  --partnerhome-border-color-warningactive: #994500;
+
+  /* Border Colors - Other */
+  --partnerhome-border-color-accent: #F6B71D;
+  --partnerhome-border-color-alert: #F6B71D;
+  --partnerhome-border-color-cool: #F5F5F5;
+  --partnerhome-border-color-disabled: #93939A;
+  --partnerhome-border-color-disabledsubtle: #F5F5F5;
+  --partnerhome-border-color-error: #C4113F;
+  --partnerhome-border-color-quaternary: #66256A;
+  --partnerhome-border-color-success: #66256A;
+
+  /* Surface Colors */
+  --partnerhome-surface-color-base: #FFFFFF;
+  --partnerhome-surface-color-inverse: #211E22;
+  --partnerhome-surface-color-inversesubtle: #F5F5F5;
+  --partnerhome-surface-color-primarysubtle: #F1E9F1;
+  --partnerhome-surface-color-neutralsubtle: #F5F5F5;
+
+  /* Utility Colors */
+  --partnerhome-utility-focus: #1364F1;
+  --partnerhome-utility-overlay-3: #211E22;
+
+  /* === SPACING TOKENS === */
+  --partnerhome-spacing-250: 2px;
+  --partnerhome-spacing-500: 4px;
+  --partnerhome-spacing-1000: 8px;
+  --partnerhome-spacing-1500: 12px;
+  --partnerhome-spacing-2000: 16px;
+  --partnerhome-spacing-2500: 20px;
+  --partnerhome-spacing-3000: 24px;
+  --partnerhome-spacing-3500: 28px;
+  --partnerhome-spacing-4000: 32px;
+  --partnerhome-spacing-4500: 36px;
+  --partnerhome-spacing-5000: 40px;
+
+  /* === BORDER RADIUS TOKENS === */
+  --partnerhome-radius-small: 1px;
+  --partnerhome-radius-base: 4px;
+  --partnerhome-radius-medium: 2px;
+  --partnerhome-radius-large: 4px;
+  --partnerhome-radius-button: 4px;
+
+  /* === STROKE WEIGHT TOKENS === */
+  --partnerhome-stroke-weights-small: 1px;
+  --partnerhome-stroke-small: 1px;
+  --partnerhome-stroke-weights-medium: 1.5px;
+  --partnerhome-stroke-medium: 1.5px;
+  --partnerhome-stroke-weights-large: 2px;
+  --partnerhome-stroke-large: 2px;
+
+  /* === TYPOGRAPHY TOKENS === */
+  
+  /* Font Family */
+  --partnerhome-font-family-base: 'Lato', 'Inter', sans-serif;
+
+  /* Font Sizes */
+  --partnerhome-font-size-500: 11.2px;
+  --partnerhome-font-size-1000: 14px;
+  --partnerhome-font-size-2000: 17.5px;
+  --partnerhome-font-size-3000: 21.9px;
+  --partnerhome-font-size-4000: 27.1px;
+  --partnerhome-font-size-5000: 34.1px;
+  --partnerhome-font-size-6000: 42.9px;
+  --partnerhome-font-size-7000: 53.4px;
+
+  /* Font Weights */
+  --partnerhome-font-weight-normal: 400;
+  --partnerhome-font-weight-regular: 400;
+  --partnerhome-font-weight-bold: 700;
+  --partnerhome-font-weight-black: 900;
+
+  /* Line Heights */
+  --partnerhome-line-height-base: 1.4286;
+
+  /* === SHADOW TOKENS === */
+  --partnerhome-shadow-color: rgba(33, 30, 34, 0.2);
+  --partnerhome-shadow-10: 0 1px 2px rgba(33, 30, 34, 0.2);
+  --partnerhome-shadow-20: 0 3px 6px rgba(33, 30, 34, 0.2);
+  --partnerhome-shadow-30: 0 5px 10px rgba(33, 30, 34, 0.2);
+  --partnerhome-shadow-40: 0 7px 14px rgba(33, 30, 34, 0.2);
+}
+
+/* === BASE ELEMENT STYLES === */
+/* Apply PartnerHome design system to base HTML elements */
+
+body {
+  font-family: var(--partnerhome-font-family-base);
+  font-size: var(--partnerhome-font-size-1000);
+  font-weight: var(--partnerhome-font-weight-normal);
+  line-height: var(--partnerhome-line-height-base);
+  color: var(--partnerhome-text-color-base);
+  background-color: var(--partnerhome-bg-color-global-body);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--partnerhome-font-family-base);
+  font-weight: var(--partnerhome-font-weight-bold);
+  line-height: var(--partnerhome-line-height-base);
+  color: var(--partnerhome-text-color-base);
+  margin: 0;
+}
+
+h1 {
+  font-size: var(--partnerhome-font-size-4000);
+}
+
+h2 {
+  font-size: var(--partnerhome-font-size-3000);
+}
+
+h3 {
+  font-size: var(--partnerhome-font-size-2000);
+}
+
+/* Paragraphs */
+p {
+  font-family: var(--partnerhome-font-family-base);
+  font-size: var(--partnerhome-font-size-1000);
+  font-weight: var(--partnerhome-font-weight-normal);
+  line-height: var(--partnerhome-line-height-base);
+  color: var(--partnerhome-text-color-base);
+  margin: 0 0 var(--partnerhome-spacing-2000) 0;
+}
+
+/* Links */
+a {
+  font-family: var(--partnerhome-font-family-base);
+  font-size: var(--partnerhome-font-size-1000);
+  font-weight: var(--partnerhome-font-weight-normal);
+  color: var(--partnerhome-text-color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+a:hover {
+  color: var(--partnerhome-text-color-primary-hover);
+}
+
+/* Buttons */
+button {
+  font-family: var(--partnerhome-font-family-base);
+  font-size: var(--partnerhome-font-size-1000);
+  font-weight: var(--partnerhome-font-weight-bold);
+  line-height: var(--partnerhome-line-height-base);
+  cursor: pointer;
+}
+
+/* Inputs */
+input,
+textarea,
+select {
+  font-family: var(--partnerhome-font-family-base);
+  font-size: var(--partnerhome-font-size-1000);
+  font-weight: var(--partnerhome-font-weight-normal);
+  line-height: var(--partnerhome-line-height-base);
+  color: var(--partnerhome-text-color-base);
+}
+
+/* Remove browser default focus outlines - use component-specific focus states instead */
+input:focus,
+textarea:focus,
+select:focus,
+button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+}
+
+/* Override focus-visible as well */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+}
+
+/* === UTILITY CLASSES === */
+
+/* Text Utilities */
+.text-primary {
+  color: var(--partnerhome-text-color-primary);
+}
+
+.text-secondary {
+  color: var(--partnerhome-text-color-secondary);
+}
+
+.text-base {
+  color: var(--partnerhome-text-color-base);
+}
+
+.text-inverse {
+  color: var(--partnerhome-text-color-inverse);
+}
+
+/* Background Utilities */
+.bg-primary {
+  background-color: var(--partnerhome-bg-color-primary);
+}
+
+.bg-secondary {
+  background-color: var(--partnerhome-bg-color-secondary);
+}
+
+.bg-base {
+  background-color: var(--partnerhome-bg-color-base);
+}
+
+.bg-body {
+  background-color: var(--partnerhome-bg-color-global-body);
+}
+
+/* Border Utilities */
+.border-primary {
+  border-color: var(--partnerhome-border-color-primary);
+}
+
+.border-base {
+  border-color: var(--partnerhome-border-color-base);
+}
+
+/* Shadow Utilities */
+.shadow-10 {
+  box-shadow: var(--partnerhome-shadow-10);
+}
+
+.shadow-20 {
+  box-shadow: var(--partnerhome-shadow-20);
+}
+
+.shadow-30 {
+  box-shadow: var(--partnerhome-shadow-30);
+}
+
+.shadow-40 {
+  box-shadow: var(--partnerhome-shadow-40);
+}
+
+/* Spacing Utilities */
+.spacing-500 {
+  padding: var(--partnerhome-spacing-500);
+}
+
+.spacing-1000 {
+  padding: var(--partnerhome-spacing-1000);
+}
+
+.spacing-2000 {
+  padding: var(--partnerhome-spacing-2000);
+}
+
+.spacing-3000 {
+  padding: var(--partnerhome-spacing-3000);
+}
+
+/* Border Radius Utilities */
+.radius-small {
+  border-radius: var(--partnerhome-radius-small);
+}
+
+.radius-base {
+  border-radius: var(--partnerhome-radius-base);
+}
+
+.radius-large {
+  border-radius: var(--partnerhome-radius-large);
+}
+
+/* Font Weight Utilities */
+.font-normal {
+  font-weight: var(--partnerhome-font-weight-normal);
+}
+
+.font-bold {
+  font-weight: var(--partnerhome-font-weight-bold);
+}
+
+/* Table Utilities */
+table td {
+  background-color: transparent !important;
+}
+
+table tbody tr {
+  background-color: transparent;
+  transition: background-color 250ms ease;
+}
+
+/* Hide number input spinner arrows */
+.pagination-page-input::-webkit-outer-spin-button,
+.pagination-page-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pagination-page-input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* Disable browser autofill background color */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px var(--partnerhome-bg-color-base) inset !important;
+  -webkit-text-fill-color: var(--partnerhome-text-color-base) !important;
+  box-shadow: 0 0 0 1000px var(--partnerhome-bg-color-base) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+input:-moz-autofill,
+input:-moz-autofill:hover,
+input:-moz-autofill:focus,
+input:-moz-autofill:active {
+  box-shadow: 0 0 0 1000px var(--partnerhome-bg-color-base) inset !important;
+  color: var(--partnerhome-text-color-base) !important;
+}

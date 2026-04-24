@@ -1,0 +1,208 @@
+/* ============================================
+   PARTNERHOME DESIGN SYSTEM - FIGMAMAKE STYLES
+   Use these EXACT styles for FigmaMake
+   ============================================ */
+
+/* === LATO WEB FONT FROM GOOGLE FONTS === */
+/* Lato is loaded from Google Fonts CDN - publicly available and reliable */
+/* Includes weights: 400 (regular), 700 (bold), 900 (black) and italic variants */
+
+@import url('https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;0,900;1,400&display=swap');
+
+/* === FONT FAMILY NOTE === */
+/* Lato is loaded from Google Fonts via @import above */
+/* Font stack: 'Lato' (primary from Google Fonts), 'Inter' (fallback), sans-serif (system fallback) */
+/* All font weights (400, 700, 900) and italic styles are available */
+
+/* === BASE TYPOGRAPHY RULES === */
+/* These are the ACTUAL styles to use - copy these directly */
+/* Focus on font-weight to control bold vs regular */
+
+/* Body Text / Paragraphs - REGULAR WEIGHT */
+body, p, span, div, 
+.text-body, .paragraph {
+  font-family: 'Lato', 'Inter', sans-serif;  /* Lato primary, Inter fallback */
+  font-weight: 400;  /* CRITICAL: Must be 400 for regular text - NOT bold! */
+  font-size: 14px;   /* 0.875rem = 14px */
+  line-height: 1.4286;
+  color: #211E22;    /* neutral-80 */
+}
+
+/* Headings - BOLD WEIGHT */
+h1, h2, h3, h4, h5, h6,
+.heading, .title {
+  font-family: 'Lato', 'Inter', sans-serif;  /* Lato primary, Inter fallback */
+  font-weight: 700;  /* Bold for headings */
+  color: #211E22;    /* neutral-80 */
+}
+
+/* Specific Heading Sizes */
+h1, .heading-h1, .page-title {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 27.1px;  /* 1.6954rem = 27.1px */
+  line-height: 1.4286;
+}
+
+h2, .heading-h2, .section-title {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 21.9px;  /* 1.3672rem = 21.9px */
+  line-height: 1.4286;
+}
+
+h3, .heading-h3, .subsection-title {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 17.5px;  /* 1.0938rem = 17.5px */
+  line-height: 1.4286;
+}
+
+/* Marketing Headings - NORMAL WEIGHT (not bold!) */
+.marketing-heading-1, .hero-heading {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 400;  /* Normal weight, not bold! */
+  font-size: 53.4px;  /* 3.3381rem = 53.4px */
+  line-height: 1.4286;
+}
+
+.marketing-heading-2 {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 400;  /* Normal weight, not bold! */
+  font-size: 42.9px;  /* 2.6797rem = 42.9px */
+  line-height: 1.4286;
+}
+
+.marketing-heading-3 {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 400;  /* Normal weight, not bold! */
+  font-size: 34.1px;  /* 2.1328rem = 34.1px */
+  line-height: 1.4286;
+}
+
+/* Small Text / Captions */
+.small-text, .caption {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 400;
+  font-size: 11.2px;  /* 0.7rem = 11.2px */
+  line-height: 1.4286;
+}
+
+/* Links */
+a, .link {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 400;  /* Regular weight for links */
+  font-size: 14px;
+  color: #66256A;    /* core-60 */
+  text-decoration: underline;
+}
+
+/* Button Text */
+button, .button {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 700;  /* Bold for button text */
+  font-size: 14px;
+}
+
+/* === INLINE STYLES FOR FIGMAMAKE === */
+/* Use these exact inline styles when needed */
+
+/* For body text in FigmaMake: */
+/* style="font-family: 'Lato', 'Inter', sans-serif; font-weight: 400; font-size: 14px; line-height: 1.4286;" */
+
+/* For headings in FigmaMake: */
+/* style="font-family: 'Lato', 'Inter', sans-serif; font-weight: 700; font-size: 27.1px; line-height: 1.4286;" */
+
+/* For marketing headings in FigmaMake: */
+/* style="font-family: 'Lato', 'Inter', sans-serif; font-weight: 400; font-size: 53.4px; line-height: 1.4286;" */
+
+/* NOTE: Lato is loaded via @font-face declarations at the top of this file */
+/* Fallback to 'Inter' if Lato fails to load, then to system sans-serif */
+
+/* === SPECIFIC USE CASES FOR FIGMAMAKE === */
+
+/* Date Text (e.g., "Apr 7, 2025") */
+.date-text {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 400;  /* Regular, not bold */
+  font-size: 14px;
+  color: #211E22;
+}
+
+/* Update/Article Titles (e.g., "View remittance history...") */
+.update-title, .article-title {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 700;  /* Bold for titles */
+  font-size: 14px;   /* Same size as body, but bold */
+  color: #211E22;
+}
+
+/* Body/Description Text (e.g., "We've renamed and upgraded...") */
+.description-text, .body-text {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 400;  /* Regular, NOT bold */
+  font-size: 14px;
+  color: #211E22;
+  line-height: 1.4286;
+}
+
+/* Section Headings (e.g., "What's new on Partner Home") */
+.section-heading {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 700;  /* Bold */
+  font-size: 21.9px;  /* h2 size */
+  color: #211E22;
+}
+
+/* Link Text (e.g., "Read More", "View All Updates") */
+.link-text, a {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 400;  /* Regular, not bold */
+  font-size: 14px;
+  color: #66256A;    /* Purple core-60 */
+  text-decoration: underline;
+}
+
+/* Button Text - Primary (e.g., "Start Onboarding") */
+.button-primary {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 700;  /* Bold for button text */
+  font-size: 14px;
+  color: #F5F5F5;    /* White text on dark button */
+}
+
+/* Button Text - Secondary (e.g., "Claim Now") */
+.button-secondary {
+  font-family: 'Lato', 'Inter', sans-serif;
+  font-weight: 400;  /* Regular weight for secondary buttons */
+  font-size: 14px;
+  color: #66256A;    /* Purple text */
+}
+
+/* === IMPORTANT NOTES FOR FIGMAMAKE === */
+/* 
+ * FONT-FAMILY: 
+ * - Lato is loaded via @font-face declarations at the top of this file
+ * - Font stack: 'Lato' (primary), 'Inter' (fallback), sans-serif (system fallback)
+ * - If font files are in a different location, update the URLs in @font-face rules
+ * - Font paths are relative to the CSS file location
+ * 
+ * FONT-WEIGHT: CRITICAL - Always specify explicitly!
+ * - font-weight: 400 = Regular text (NOT bold) - uses latolatin-regular.woff2
+ * - font-weight: 700 = Bold text (for headings, titles) - uses latolatin-bold.woff2
+ * - font-weight: 900 = Black weight - uses latolatin-black.woff2
+ * - font-style: italic - uses latolatin-italic.woff2
+ * - If font-weight is not specified, FigmaMake defaults to bold
+ * 
+ * TEXT COLORS:
+ * - Primary Text (body, headings): #211E22 (neutral-80) - DARK GRAY, NOT WHITE
+ * - Links: #66256A (core-60) - Purple
+ * - White Text: #F5F5F5 (neutral-10) - ONLY for text on dark backgrounds (buttons)
+ * 
+ * BACKGROUND COLORS:
+ * - Page Background: #F5F5F5 (neutral-10) - Light gray/white
+ * - Primary Button: #66256A (core-60) - Purple
+ * 
+ * IMPORTANT: On light backgrounds (#F5F5F5), use DARK text (#211E22), NOT white!
+ * White text (#F5F5F5) is ONLY for dark backgrounds like primary buttons.
+ */
