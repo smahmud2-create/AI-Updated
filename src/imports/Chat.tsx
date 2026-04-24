@@ -1311,7 +1311,7 @@ const TASK_CARDS: TaskCardData[] = [
     statusColor: "#B8860B",
     collaboratorInitials: "CA",
     collaboratorName: "Catalog",
-    collaboratorColor: "#1A8C5E",
+    collaboratorColor: "#2E7D6F",
     ctaLabel: "Review Changes",
     progress: { current: 2, total: 3 },
   },
@@ -1319,7 +1319,7 @@ const TASK_CARDS: TaskCardData[] = [
     title: "Review ad spend efficiency",
     description: "Analyzed performance and suggested improvements",
     status: "Completed",
-    statusColor: "#1A8C5E",
+    statusColor: "#2E7D6F",
     collaboratorInitials: "AA",
     collaboratorName: "Ads",
     collaboratorColor: "#2B6CB0",
@@ -1631,20 +1631,20 @@ const TASK_FILTER_OPTIONS = [
 ];
 
 const AGENT_FILTER_OPTIONS = [
-  { id: "performance", label: "Performance Insights" },
-  { id: "catalog", label: "Catalog" },
+  { id: "promotions", label: "Promotions" },
   { id: "ads", label: "Ads" },
+  { id: "catalog", label: "Catalog" },
 ];
 
 const MY_AGENTS = [
   {
-    name: "Performance Insights",
-    initials: "PI",
-    color: "#66256A",
-    description: "Tracks sales trends, flags anomalies, and recommends actions to boost performance.",
-    currently: "Watching sales and conversion",
-    lastAction: "Identified 4 underperforming products",
-    activityIcon: "monitor",
+    name: "Promotions",
+    initials: "PA",
+    color: "#1A8C5E",
+    description: "Enrolls products into offers, promotions, and discounts and tunes depth based on performance.",
+    currently: "Idle",
+    lastAction: "Launched SPRING coupon for 4 products",
+    activityIcon: "execute",
     tier: "Free",
   },
   {
@@ -1660,7 +1660,7 @@ const MY_AGENTS = [
   {
     name: "Catalog",
     initials: "CA",
-    color: "#1A8C5E",
+    color: "#2E7D6F",
     description: "Improves listing quality by reviewing titles, images, and descriptions.",
     currently: "Reviewing product content",
     lastAction: "Flagged missing content on 2 products",
@@ -1669,7 +1669,51 @@ const MY_AGENTS = [
   },
 ];
 
-function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () => void }) {
+const MOCK_LEARNED_STEPS_BY_AGENT: Record<string, string[]> = {
+  Catalog: [
+    "Opened Catalog → Bulk Upload",
+    "Selected upload template: Furniture (CSV)",
+    "Mapped column 'name' → Product Title",
+    "Mapped column 'price' → Sale Price",
+    "Set default category to Bedroom › Beds",
+    "Enabled image auto-optimization (resize to 2000px)",
+    "Applied SEO title formula: {brand} {product} {color} {size}",
+    "Fixed missing dimensions on 3 listings",
+    "Published all 24 listings",
+  ],
+  Promotions: [
+    "Opened Promotions → New Coupon",
+    "Selected products from Bedroom collection",
+    "Set discount type: Percent off",
+    "Set discount depth to 15%",
+    "Configured coupon code: SPRING15",
+    "Set start date to next Monday",
+    "Limited redemptions to 500",
+    "Published coupon",
+  ],
+  Ads: [
+    "Opened Ads → New Sponsored Campaign",
+    "Selected 4 products to promote",
+    "Set bidding strategy: Target ROAS",
+    "Set Target ROAS to 4.0",
+    "Set daily budget to $50",
+    "Set campaign duration: 14 days",
+    "Reviewed projected impressions",
+    "Launched campaign",
+  ],
+};
+const DEFAULT_LEARNED_STEPS = [
+  "Opened the workspace",
+  "Selected the relevant products",
+  "Adjusted the recommended action",
+  "Reviewed the impact estimate",
+  "Confirmed the change",
+];
+
+type LearnedStep = { id: string; text: string };
+
+function TeachTaskView({ agent, onBack }: { agent: typeof MY_AGENTS[number]; onBack: () => void }) {
+  const agentName = agent.name;
   const [backHovered, setBackHovered] = useState(false);
   const [uploadHovered, setUploadHovered] = useState(false);
   const [screenHovered, setScreenHovered] = useState(false);
@@ -1677,13 +1721,44 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [screenState, setScreenState] = useState<"idle" | "recording" | "recorded">("idle");
   const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [capturedDuration, setCapturedDuration] = useState(0);
+  const [learnedSteps, setLearnedSteps] = useState<LearnedStep[]>([]);
+  const [draftSaved, setDraftSaved] = useState(false);
+  const [draftHovered, setDraftHovered] = useState(false);
+  const [submitHovered, setSubmitHovered] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const stepBank = useMemo(
+    () => MOCK_LEARNED_STEPS_BY_AGENT[agentName] ?? DEFAULT_LEARNED_STEPS,
+    [agentName],
+  );
 
   useEffect(() => {
     if (screenState !== "recording") return;
     const interval = setInterval(() => setRecordingSeconds(s => s + 1), 1000);
     return () => clearInterval(interval);
   }, [screenState]);
+
+  // Reset learning state whenever a new recording starts
+  useEffect(() => {
+    if (screenState === "recording") {
+      setLearnedSteps([]);
+      setDraftSaved(false);
+    }
+  }, [screenState]);
+
+  // Stream learned steps in as the recording progresses (one every ~4s)
+  useEffect(() => {
+    if (screenState !== "recording") return;
+    const expected = Math.min(Math.floor(recordingSeconds / 4) + 1, stepBank.length);
+    setLearnedSteps(prev => {
+      if (prev.length >= expected) return prev;
+      const additions = stepBank
+        .slice(prev.length, expected)
+        .map((text, i) => ({ id: `step-${prev.length + i}-${Date.now()}`, text }));
+      return [...prev, ...additions];
+    });
+  }, [recordingSeconds, screenState, stepBank]);
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 
@@ -1692,16 +1767,30 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
     setUploadState("uploaded");
   };
 
+  const updateStep = (id: string, text: string) =>
+    setLearnedSteps(prev => prev.map(s => (s.id === id ? { ...s, text } : s)));
+  const removeStep = (id: string) =>
+    setLearnedSteps(prev => prev.filter(s => s.id !== id));
+  const addStep = () =>
+    setLearnedSteps(prev => [...prev, { id: `step-new-${Date.now()}`, text: "" }]);
+
+  const handleSaveDraft = () => {
+    setDraftSaved(true);
+    setTimeout(() => setDraftSaved(false), 2500);
+  };
+
+  const hasNonEmptySteps = learnedSteps.some(s => s.text.trim().length > 0);
+
   const cardBase: React.CSSProperties = {
-    border: "1.5px solid #E0D6E3",
-    borderRadius: "12px",
-    padding: "20px",
+    border: "1px solid #E5E5E7",
+    borderRadius: "8px",
+    padding: "16px",
     backgroundColor: "#FFFFFF",
     display: "flex",
     flexDirection: "column",
     gap: "12px",
     cursor: "pointer",
-    transition: "all 0.2s ease",
+    transition: "all 0.15s ease",
   };
 
   return (
@@ -1732,23 +1821,36 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
         </div>
       )}
 
-      {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: "10px",
-        padding: "12px 24px", borderBottom: "1px solid #D7D7D7",
-        flexShrink: 0, backgroundColor: "#FAFAFA",
-      }}>
+      {/* Header — matches TasksView */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          padding: "16px 24px 8px",
+          flexShrink: 0,
+          backgroundColor: "#FFFFFF",
+        }}
+      >
         <button
           onClick={onBack}
           onMouseEnter={() => setBackHovered(true)}
           onMouseLeave={() => setBackHovered(false)}
           style={{
-            display: "flex", alignItems: "center", justifyContent: "center",
-            width: "20px", height: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "28px",
+            height: "28px",
             border: "1px solid transparent",
             background: backHovered ? "#EEEEEE" : "none",
-            borderRadius: "6px", cursor: "pointer", padding: 0, margin: 0,
-            boxShadow: "none", flexShrink: 0, transition: "all 0.15s",
+            borderRadius: "6px",
+            cursor: "pointer",
+            padding: 0,
+            margin: 0,
+            boxShadow: "none",
+            flexShrink: 0,
+            transition: "all 0.15s",
             borderColor: backHovered ? "#D1D1D6" : "transparent",
           }}
         >
@@ -1756,21 +1858,61 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
             <path d="M10 12L6 8L10 4" stroke="#211e22" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", fontWeight: "bold", lineHeight: "20px", color: "#211e22" }}>
-            Teach a Task
-          </span>
-          <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "14px", color: "#93939A" }}>
-            {agentName}
-          </span>
+        <span
+          style={{
+            fontFamily: "'Lato', sans-serif",
+            fontSize: "var(--partnerhome-font-size-1000)",
+            fontWeight: "bold",
+            lineHeight: "20px",
+            color: "#211e22",
+          }}
+        >
+          Teach a Task
+        </span>
+      </div>
+
+      {/* Agent context strip — matches AgentRulesView */}
+      <div style={{ padding: "0 24px 16px", flexShrink: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "10px 12px",
+            border: "1px solid #E5E5E7",
+            borderRadius: "8px",
+            backgroundColor: "#FAFAFA",
+          }}
+        >
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "50%",
+              backgroundColor: agent.color,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "11px", fontWeight: "bold", color: "#FFFFFF", lineHeight: "1" }}>
+              {agent.initials}
+            </span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
+            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "20px", color: "#211e22", fontWeight: "bold" }}>
+              {agentName}
+            </span>
+            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#646266" }}>
+              Show this agent how to do something new with a skill file or a screen recording
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflow: "auto", padding: "20px 24px", display: "flex", flexDirection: "column", gap: "16px" }}>
-        <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "18px", color: "#646266" }}>
-          Choose how you'd like to teach <span style={{ fontWeight: "bold" }}>{agentName}</span> a new task:
-        </span>
+      <div style={{ flex: 1, overflow: "auto", padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: "16px" }}>
 
         {/* Option 1: Upload a Skill File */}
         <div
@@ -1788,8 +1930,8 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
           }}
           style={{
             ...cardBase,
-            borderColor: uploadState === "dragging" ? "#66256A" : uploadState === "uploaded" ? "#2E7D32" : uploadHovered ? "#D5B9DF" : "#E0D6E3",
-            backgroundColor: uploadState === "dragging" ? "#FAF5FC" : uploadState === "uploaded" ? "#F6FBF6" : uploadHovered ? "#FDFBFE" : "#FFFFFF",
+            borderColor: uploadState === "dragging" ? "#66256A" : uploadState === "uploaded" ? "#2E7D32" : "#E5E5E7",
+            backgroundColor: uploadState === "dragging" ? "#F3ECF4" : uploadState === "uploaded" ? "#F6FBF6" : uploadHovered ? "#FAFAFA" : "#FFFFFF",
             borderStyle: uploadState === "dragging" ? "dashed" : "solid",
           }}
         >
@@ -1805,26 +1947,26 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
           />
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{
-              width: "40px", height: "40px", borderRadius: "10px",
+              width: "36px", height: "36px", borderRadius: "8px",
               backgroundColor: uploadState === "uploaded" ? "#E8F5E9" : "#F3ECF4",
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
               {uploadState === "uploaded" ? (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                   <path d="M5 10L9 14L15 6" stroke="#2E7D32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               ) : (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                   <path d="M10 3V13M10 3L6.5 6.5M10 3L13.5 6.5" stroke="#66256A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   <path d="M3 13V15C3 16.1046 3.89543 17 5 17H15C16.1046 17 17 16.1046 17 15V13" stroke="#66256A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               )}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "2px", flex: 1 }}>
-              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px", color: "#211e22", fontWeight: "bold" }}>
+              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "20px", color: "#211e22", fontWeight: "bold" }}>
                 Upload a Skill File
               </span>
-              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px", color: "#777279" }}>
+              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#646266" }}>
                 {uploadState === "uploaded"
                   ? uploadedFileName
                   : "Drag & drop or click to upload a .md, .txt, .json, or .yaml file"
@@ -1835,24 +1977,26 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
 
           {uploadState === "uploaded" && (
             <div style={{
-              display: "flex", alignItems: "center", gap: "6px",
-              padding: "8px 12px", borderRadius: "8px", backgroundColor: "#E8F5E9",
+              display: "flex", alignItems: "center", gap: "8px",
+              padding: "8px 12px", borderRadius: "6px",
+              border: "1px solid #E5E5E7", backgroundColor: "#FAFAFA",
             }}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M3.5 7L6 9.5L10.5 4.5" stroke="#2E7D32" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M3.5 7L6 9.5L10.5 4.5" stroke="#66256A" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "14px", color: "#2E7D32", fontWeight: "bold" }}>
-                Skill file uploaded — agent will learn from it on next run
+              <span style={{ flex: 1, fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#211e22", minWidth: 0 }}>
+                <span style={{ fontWeight: "bold" }}>Skill file uploaded.</span>
+                <span style={{ color: "#646266" }}> Agent will learn from it on next run.</span>
               </span>
             </div>
           )}
 
           {uploadState === "idle" && (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
               {[".md", ".txt", ".json", ".yaml"].map(ext => (
                 <span key={ext} style={{
-                  fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "12px", fontWeight: "bold",
-                  color: "#93939A", backgroundColor: "#F5F5F5", padding: "2px 6px", borderRadius: "4px",
+                  fontFamily: "'Lato', sans-serif", fontSize: "12px", lineHeight: "16px", fontWeight: "bold",
+                  color: "#646266", backgroundColor: "#F5F5F7", padding: "2px 8px", borderRadius: "6px",
                 }}>
                   {ext}
                 </span>
@@ -1863,9 +2007,9 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
 
         {/* Divider */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ flex: 1, height: "1px", backgroundColor: "#E0D6E3" }} />
-          <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "14px", color: "#93939A", fontWeight: "bold" }}>OR</span>
-          <div style={{ flex: 1, height: "1px", backgroundColor: "#E0D6E3" }} />
+          <div style={{ flex: 1, height: "1px", backgroundColor: "#E5E5E7" }} />
+          <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "12px", lineHeight: "16px", color: "#646266", fontWeight: "bold", letterSpacing: "0.06em" }}>OR</span>
+          <div style={{ flex: 1, height: "1px", backgroundColor: "#E5E5E7" }} />
         </div>
 
         {/* Option 2: Share your Screen */}
@@ -1877,28 +2021,28 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
           }}
           style={{
             ...cardBase,
-            borderColor: screenState === "recording" ? "#C62828" : screenState === "recorded" ? "#2E7D32" : screenHovered ? "#D5B9DF" : "#E0D6E3",
-            backgroundColor: screenState === "recording" ? "#FFF8F8" : screenState === "recorded" ? "#F6FBF6" : screenHovered ? "#FDFBFE" : "#FFFFFF",
+            borderColor: screenState === "recording" ? "#C62828" : screenState === "recorded" ? "#2E7D32" : "#E5E5E7",
+            backgroundColor: screenState === "recording" ? "#FFF8F8" : screenState === "recorded" ? "#F6FBF6" : screenHovered ? "#FAFAFA" : "#FFFFFF",
             cursor: screenState === "recording" ? "default" : "pointer",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <div style={{
-              width: "40px", height: "40px", borderRadius: "10px",
+              width: "36px", height: "36px", borderRadius: "8px",
               backgroundColor: screenState === "recording" ? "#FFEBEE" : screenState === "recorded" ? "#E8F5E9" : "#F3ECF4",
               display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
               {screenState === "recorded" ? (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                   <path d="M5 10L9 14L15 6" stroke="#2E7D32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               ) : screenState === "recording" ? (
                 <div style={{
-                  width: "14px", height: "14px", borderRadius: "50%", backgroundColor: "#C62828",
+                  width: "12px", height: "12px", borderRadius: "50%", backgroundColor: "#C62828",
                   animation: "pulseCurrently 1.5s ease-in-out infinite",
                 }} />
               ) : (
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                   <rect x="2" y="3" width="16" height="11" rx="2" stroke="#66256A" strokeWidth="1.5" />
                   <path d="M7 17H13" stroke="#66256A" strokeWidth="1.5" strokeLinecap="round" />
                   <path d="M10 14V17" stroke="#66256A" strokeWidth="1.5" strokeLinecap="round" />
@@ -1907,14 +2051,14 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
               )}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "2px", flex: 1 }}>
-              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px", color: "#211e22", fontWeight: "bold" }}>
-                {screenState === "recording" ? "Recording your screen..." : screenState === "recorded" ? "Screen recording saved" : "Share your Screen"}
+              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "20px", color: "#211e22", fontWeight: "bold" }}>
+                {screenState === "recording" ? "Recording your screen…" : screenState === "recorded" ? "Recording captured" : "Share your Screen"}
               </span>
-              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px", color: "#777279" }}>
+              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#646266" }}>
                 {screenState === "recording"
                   ? `Show the agent how to perform the task — ${formatTime(recordingSeconds)}`
                   : screenState === "recorded"
-                  ? "Agent will analyze the recording to learn the task"
+                  ? `${learnedSteps.length} ${learnedSteps.length === 1 ? "step" : "steps"} captured in ${formatTime(capturedDuration)}`
                   : "Walk through a task live so the agent can watch and replicate it"
                 }
               </span>
@@ -1923,13 +2067,13 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
 
           {screenState === "recording" && (
             <button
-              onClick={(e) => { e.stopPropagation(); setScreenState("recorded"); setRecordingSeconds(0); }}
+              onClick={(e) => { e.stopPropagation(); setCapturedDuration(recordingSeconds); setScreenState("recorded"); setRecordingSeconds(0); }}
               style={{
                 display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
-                padding: "8px 16px", borderRadius: "8px",
-                border: "1.5px solid #C62828", backgroundColor: "#FFFFFF",
+                padding: "0 16px", height: "36px", borderRadius: "6px",
+                border: "1px solid #C62828", backgroundColor: "#FFFFFF",
                 cursor: "pointer", transition: "all 0.15s ease",
-                fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px",
+                fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px",
                 fontWeight: "bold", color: "#C62828", boxShadow: "none", width: "100%",
               }}
             >
@@ -1941,30 +2085,214 @@ function TeachTaskView({ agentName, onBack }: { agentName: string; onBack: () =>
           )}
 
           {screenState === "recorded" && (
-            <div style={{
-              display: "flex", alignItems: "center", gap: "6px",
-              padding: "8px 12px", borderRadius: "8px", backgroundColor: "#E8F5E9",
-            }}>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M3.5 7L6 9.5L10.5 4.5" stroke="#2E7D32" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "14px", color: "#2E7D32", fontWeight: "bold" }}>
-                Recording saved — agent will learn the task pattern
-              </span>
+            <div style={{ display: "flex", alignItems: "center", gap: "16px", paddingTop: "2px" }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setScreenState("idle");
+                  setLearnedSteps([]);
+                  setCapturedDuration(0);
+                }}
+                style={{
+                  border: "none", background: "none", padding: 0, cursor: "pointer",
+                  fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px",
+                  color: "#646266", fontWeight: "normal", boxShadow: "none",
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2.5 3H9.5M5 5.5V8.5M7 5.5V8.5M3.5 3L4 10C4 10.3 4.2 10.5 4.5 10.5H7.5C7.8 10.5 8 10.3 8 10L8.5 3M4.5 3V2C4.5 1.7 4.7 1.5 5 1.5H7C7.3 1.5 7.5 1.7 7.5 2V3" stroke="#646266" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Discard
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCapturedDuration(0);
+                  setLearnedSteps([]);
+                  setScreenState("recording");
+                }}
+                style={{
+                  border: "none", background: "none", padding: 0, cursor: "pointer",
+                  fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px",
+                  color: "#66256A", fontWeight: "bold", boxShadow: "none",
+                  display: "inline-flex", alignItems: "center", gap: "6px",
+                }}
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path d="M2 6C2 3.8 3.8 2 6 2C7.5 2 8.8 2.85 9.5 4.1M10 6C10 8.2 8.2 10 6 10C4.5 10 3.2 9.15 2.5 7.9" stroke="#66256A" strokeWidth="1.3" strokeLinecap="round" />
+                  <path d="M9.5 1.5V4.1H6.9M2.5 10.5V7.9H5.1" stroke="#66256A" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Re-record
+              </button>
             </div>
           )}
 
           {screenState === "idle" && (
             <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                <path d="M6 1V11M1 6H11" stroke="#93939A" strokeWidth="1.2" strokeLinecap="round" />
+                <path d="M6 1V11M1 6H11" stroke="#646266" strokeWidth="1.2" strokeLinecap="round" />
               </svg>
-              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "14px", color: "#93939A" }}>
+              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "12px", lineHeight: "16px", color: "#646266" }}>
                 Browser will ask for screen sharing permission
               </span>
             </div>
           )}
         </div>
+
+        {/* Learning panel — visible while recording or after */}
+        {(screenState === "recording" || screenState === "recorded") && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 2px" }}>
+              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "12px", lineHeight: "16px", color: "#646266", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Steps the agent learned
+              </span>
+              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "12px", lineHeight: "16px", color: "#646266" }}>
+                {learnedSteps.length} {learnedSteps.length === 1 ? "step" : "steps"}
+              </span>
+            </div>
+            <div style={{ border: "1px solid #E5E5E7", borderRadius: "8px", backgroundColor: "#FFFFFF", padding: "12px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              {screenState === "recording" && (
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "2px 4px 8px", borderBottom: "1px solid #EFEFF1" }}>
+                  <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#C62828", animation: "pulseCurrently 1.2s ease-in-out infinite", flexShrink: 0 }} />
+                  <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#646266" }}>
+                    Watching your screen — capturing each action…
+                  </span>
+                </div>
+              )}
+
+              {learnedSteps.length === 0 && screenState === "recording" && (
+                <div style={{ padding: "16px 8px", textAlign: "center" }}>
+                  <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#646266" }}>
+                    Steps will appear here as the agent observes you.
+                  </span>
+                </div>
+              )}
+
+              {learnedSteps.map((step, idx) => {
+                const editable = screenState === "recorded";
+                return (
+                  <div key={step.id} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "12px", fontWeight: "bold", color: "#646266", width: "20px", flexShrink: 0, textAlign: "right" }}>
+                      {idx + 1}.
+                    </span>
+                    {editable ? (
+                      <input
+                        value={step.text}
+                        onChange={(e) => updateStep(step.id, e.target.value)}
+                        placeholder="Describe this step…"
+                        style={{
+                          flex: 1, fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px",
+                          color: "#211e22", border: "1px solid #D1D1D6", borderRadius: "6px",
+                          padding: "8px 10px", outline: "none", backgroundColor: "#FFFFFF",
+                          boxShadow: "none",
+                        }}
+                      />
+                    ) : (
+                      <span style={{
+                        flex: 1, fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px",
+                        color: "#211e22", padding: "8px 10px", borderRadius: "6px",
+                        backgroundColor: screenState === "recording" ? "#FAFAFA" : "transparent",
+                        border: screenState === "recording" ? "1px solid #EFEFF1" : "1px solid transparent",
+                      }}>
+                        {step.text}
+                      </span>
+                    )}
+                    {editable && (
+                      <button
+                        onClick={() => removeStep(step.id)}
+                        aria-label="Delete step"
+                        style={{
+                          width: "28px", height: "28px", border: "1px solid transparent",
+                          background: "none", borderRadius: "6px", cursor: "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          padding: 0, flexShrink: 0, boxShadow: "none",
+                        }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                          <path d="M3 3L11 11M11 3L3 11" stroke="#646266" strokeWidth="1.4" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+
+              {screenState === "recorded" && (
+                <button
+                  onClick={addStep}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: "6px", marginTop: "2px",
+                    padding: "6px 8px", border: "none", background: "none", cursor: "pointer",
+                    fontFamily: "'Lato', sans-serif", fontSize: "13px", color: "#66256A", fontWeight: "bold",
+                    alignSelf: "flex-start", boxShadow: "none",
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                    <path d="M6 2.5V9.5M2.5 6H9.5" stroke="#66256A" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                  Add Step
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Footer actions + slim safety note */}
+        {screenState === "recorded" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                onClick={handleSaveDraft}
+                onMouseEnter={() => setDraftHovered(true)}
+                onMouseLeave={() => setDraftHovered(false)}
+                style={{
+                  flex: 1, height: "44px", padding: "0 20px", borderRadius: "6px",
+                  border: draftHovered ? "1px solid #7B189F" : "1px solid #D1D1D6",
+                  backgroundColor: draftSaved ? "#F6FBF6" : (draftHovered ? "#FAFAFA" : "#FFFFFF"),
+                  color: draftSaved ? "#2E7D32" : "#66256A",
+                  fontFamily: "'Lato', 'Inter', sans-serif",
+                  fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "20px",
+                  fontWeight: "var(--partnerhome-font-weight-normal)",
+                  cursor: "pointer", boxShadow: "none", outline: "none",
+                  transition: "all 0.15s ease",
+                  display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "6px",
+                }}
+              >
+                {draftSaved ? "Draft Saved" : "Save Draft"}
+              </button>
+              <button
+                onMouseEnter={() => setSubmitHovered(true)}
+                onMouseLeave={() => setSubmitHovered(false)}
+                disabled={!hasNonEmptySteps}
+                style={{
+                  flex: 2, height: "44px", padding: "0 20px", borderRadius: "6px",
+                  border: "none",
+                  backgroundColor: !hasNonEmptySteps ? "#B89BBE" : (submitHovered ? "#7B189F" : "#66256A"),
+                  color: "#FFFFFF",
+                  fontFamily: "'Lato', 'Inter', sans-serif",
+                  fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "20px",
+                  fontWeight: "bold",
+                  cursor: hasNonEmptySteps ? "pointer" : "not-allowed",
+                  boxShadow: "none", outline: "none",
+                  transition: "all 0.15s ease",
+                  opacity: hasNonEmptySteps ? 1 : 0.7,
+                }}
+              >
+                Submit for Review
+              </button>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px", padding: "0 2px" }}>
+              <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M7 1.5L2 3.5V7C2 9.75 4.25 12 7 13C9.75 12 12 9.75 12 7V3.5L7 1.5Z" stroke="#646266" strokeWidth="1.2" strokeLinejoin="round" />
+              </svg>
+              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "12px", lineHeight: "16px", color: "#646266" }}>
+                Wayfair spot-checks new training to keep automations safe.
+              </span>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );
@@ -1996,16 +2324,18 @@ function RuleRow({ label, description, enabled, onToggle }: { label: string; des
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={onToggle}
       style={{
         display: "flex", alignItems: "center", gap: "12px",
         padding: "12px 14px", borderRadius: "8px",
         backgroundColor: hovered ? "#FAFAFA" : "transparent",
         transition: "background-color 0.15s ease",
+        cursor: "pointer",
       }}
     >
       <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "2px" }}>
-        <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px", color: "#211e22", fontWeight: "bold" }}>{label}</span>
-        <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px", color: "#777279" }}>{description}</span>
+        <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "20px", color: "#211e22", fontWeight: "bold" }}>{label}</span>
+        <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#646266" }}>{description}</span>
       </div>
       <ToggleSwitch enabled={enabled} onToggle={onToggle} />
     </div>
@@ -2013,21 +2343,16 @@ function RuleRow({ label, description, enabled, onToggle }: { label: string; des
 }
 
 function SelectRow({ label, description, value, options, onChange }: { label: string; description: string; value: string; options: string[]; onChange: (v: string) => void }) {
-  const [hovered, setHovered] = useState(false);
   return (
     <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
       style={{
-        display: "flex", flexDirection: "column", gap: "8px",
+        display: "flex", flexDirection: "column", gap: "10px",
         padding: "12px 14px", borderRadius: "8px",
-        backgroundColor: hovered ? "#FAFAFA" : "transparent",
-        transition: "background-color 0.15s ease",
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-        <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px", color: "#211e22", fontWeight: "bold" }}>{label}</span>
-        <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px", color: "#777279" }}>{description}</span>
+        <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "20px", color: "#211e22", fontWeight: "bold" }}>{label}</span>
+        <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#646266" }}>{description}</span>
       </div>
       <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
         {options.map(opt => (
@@ -2035,11 +2360,11 @@ function SelectRow({ label, description, value, options, onChange }: { label: st
             key={opt}
             onClick={() => onChange(opt)}
             style={{
-              padding: "4px 10px", borderRadius: "6px",
-              border: `1.5px solid ${value === opt ? "#66256A" : "#D1D1D6"}`,
+              padding: "6px 12px", borderRadius: "6px",
+              border: `1px solid ${value === opt ? "#66256A" : "#D1D1D6"}`,
               backgroundColor: value === opt ? "#F3ECF4" : "#FFFFFF",
-              color: value === opt ? "#66256A" : "#646266",
-              fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px",
+              color: value === opt ? "#66256A" : "#211e22",
+              fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px",
               fontWeight: value === opt ? "bold" : "normal",
               cursor: "pointer", boxShadow: "none", transition: "all 0.15s ease",
             }}
@@ -2052,43 +2377,269 @@ function SelectRow({ label, description, value, options, onChange }: { label: st
   );
 }
 
+function ChannelIcon({ id }: { id: string; active: boolean }) {
+  const size = 16;
+  switch (id) {
+    case "inapp":
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M12 2.25c-3.728 0-6.75 3.022-6.75 6.75v3.094l-1.5 3.156a.75.75 0 0 0 .677 1.075h15.146a.75.75 0 0 0 .677-1.075l-1.5-3.156V9c0-3.728-3.022-6.75-6.75-6.75Z"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinejoin="round"
+          />
+          <path
+            d="M9.75 18.75a2.25 2.25 0 0 0 4.5 0"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          />
+        </svg>
+      );
+    case "email":
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect
+            x="2.75"
+            y="5.25"
+            width="18.5"
+            height="13.5"
+            rx="2"
+            stroke="currentColor"
+            strokeWidth="1.6"
+          />
+          <path
+            d="M3.5 6.5 12 13l8.5-6.5"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      );
+    case "wechat":
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.328.328 0 0 0 .17-.054l1.903-1.114a.864.864 0 0 1 .405-.114c.106 0 .21.014.31.04 1.046.32 2.179.5 3.36.5.157 0 .314-.005.472-.013-.32-.953-.494-1.96-.494-3 0-4.054 3.891-7.343 8.691-7.343.158 0 .315.005.471.014C17.474 4.45 13.514 2.188 8.69 2.188ZM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.18A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18Zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.18 1.17 1.17 0 0 1-1.162-1.18c0-.651.52-1.18 1.162-1.18Zm5.34 4.916c-3.46 0-6.27 2.367-6.27 5.288 0 2.92 2.81 5.288 6.27 5.288.7 0 1.376-.099 2.005-.28a.583.583 0 0 1 .163-.024c.106 0 .21.026.305.075l1.376.798a.272.272 0 0 0 .14.04.232.232 0 0 0 .233-.234.41.41 0 0 0-.038-.16l-.282-1.057a.49.49 0 0 1 .175-.555C22.36 21.157 24 19.187 24 16.92c0-2.92-3.025-5.013-6.062-6.013Zm-2.005 2.566c.43 0 .779.353.779.787 0 .435-.349.787-.779.787a.781.781 0 0 1-.779-.787c0-.434.348-.787.779-.787Zm4.011 0c.43 0 .779.353.779.787 0 .435-.349.787-.779.787a.781.781 0 0 1-.779-.787c0-.434.349-.787.779-.787Z" />
+        </svg>
+      );
+    case "whatsapp":
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347Zm-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884Zm8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+        </svg>
+      );
+    case "slack":
+      return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52Zm1.271 0a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.834 24a2.528 2.528 0 0 1-2.521-2.522v-6.313ZM8.834 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.834 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.834Zm0 1.271a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.834a2.528 2.528 0 0 1 2.522-2.521h6.312Zm10.122 2.521a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.834a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.834Zm-1.268 0a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.312Zm-2.523 10.122a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.527 2.527 0 0 1-2.52-2.522v-2.522h2.52Zm0-1.268a2.527 2.527 0 0 1-2.52-2.523 2.526 2.526 0 0 1 2.52-2.52h6.313A2.527 2.527 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313Z" />
+        </svg>
+      );
+    default:
+      return null;
+  }
+}
+
+const NOTIFICATION_CHANNELS: { id: string; label: string }[] = [
+  { id: "inapp", label: "In App" },
+  { id: "email", label: "Email" },
+  { id: "wechat", label: "WeChat" },
+  { id: "whatsapp", label: "WhatsApp" },
+  { id: "slack", label: "Slack" },
+];
+
+function NotificationChannels({ selected, onToggle }: { selected: string[]; onToggle: (id: string) => void }) {
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+      {NOTIFICATION_CHANNELS.map(ch => {
+        const isOn = selected.includes(ch.id);
+        return (
+          <button
+            key={ch.id}
+            onClick={() => onToggle(ch.id)}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "8px",
+              padding: "8px 12px", borderRadius: "6px",
+              border: `1px solid ${isOn ? "#66256A" : "#D1D1D6"}`,
+              backgroundColor: isOn ? "#F3ECF4" : "#FFFFFF",
+              color: isOn ? "#66256A" : "#211e22",
+              fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px",
+              fontWeight: isOn ? "bold" : "normal",
+              cursor: "pointer", boxShadow: "none",
+              transition: "all 0.15s ease",
+            }}
+          >
+            <span style={{ display: "inline-flex", color: isOn ? "#66256A" : "#646266" }}>
+              <ChannelIcon id={ch.id} active={isOn} />
+            </span>
+            {ch.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+type AgentRulesConfig = {
+  scope: { label: string; description: string; options: string[]; default: string };
+  limit?: { label: string; description: string; options: string[]; default: string };
+  reviews: { id: string; label: string; description: string; default: boolean }[];
+};
+
+function getAgentRulesConfig(agentName: string): AgentRulesConfig {
+  switch (agentName) {
+    case "Performance Insights":
+      return {
+        scope: {
+          label: "Operating Mode",
+          description: "How proactively this agent flags issues across your catalog",
+          options: ["Monitor Only", "Monitor & Recommend", "Auto-Execute"],
+          default: "Monitor & Recommend",
+        },
+        reviews: [
+          { id: "anomaly-share", label: "Share anomaly findings", description: "Surface anomalies in chat as they're detected", default: true },
+          { id: "weekly-digest", label: "Weekly performance digest", description: "Send a summary of trends and outliers each Monday", default: true },
+          { id: "auto-flag", label: "Auto-flag underperformers", description: "Add products to the workspace when sales drop > 20% week over week", default: false },
+        ],
+      };
+    case "Promotions":
+      return {
+        scope: {
+          label: "Operating Mode",
+          description: "How much autonomy this agent has when launching offers",
+          options: ["Monitor Only", "Recommend Offers", "Auto-Execute"],
+          default: "Recommend Offers",
+        },
+        limit: {
+          label: "Max Discount Depth",
+          description: "Largest discount this agent can apply without your approval",
+          options: ["10%", "15%", "20%", "25%", "30%"],
+          default: "20%",
+        },
+        reviews: [
+          { id: "new-coupon", label: "New coupon launches", description: "Approve every new coupon before it goes live", default: true },
+          { id: "depth-change", label: "Discount depth changes", description: "Confirm changes to active coupon depth", default: true },
+          { id: "stack", label: "Stacking with other offers", description: "Review when a coupon stacks with an active promotion", default: false },
+          { id: "expiry", label: "Auto-extend expiring offers", description: "Let agent extend top-performing coupons by 7 days", default: false },
+        ],
+      };
+    case "Ads":
+      return {
+        scope: {
+          label: "Operating Mode",
+          description: "How much autonomy this agent has over your sponsored spend",
+          options: ["Monitor Only", "Recommend Changes", "Auto-Execute"],
+          default: "Recommend Changes",
+        },
+        limit: {
+          label: "Daily Spend Cap",
+          description: "Max ad spend the agent can commit in a single day",
+          options: ["$25/day", "$50/day", "$100/day", "$500/day", "Unlimited"],
+          default: "$100/day",
+        },
+        reviews: [
+          { id: "new-campaign", label: "New campaign creation", description: "Approve any new sponsored campaign before launch", default: true },
+          { id: "budget-realloc", label: "Budget reallocation", description: "Confirm before shifting spend across campaigns", default: true },
+          { id: "bid-changes", label: "Bid adjustments > 25%", description: "Review large bid changes on existing campaigns", default: true },
+          { id: "pause-low", label: "Auto-pause low ROAS campaigns", description: "Allow agent to pause campaigns under target ROAS for 7+ days", default: false },
+        ],
+      };
+    case "Catalog":
+      return {
+        scope: {
+          label: "Operating Mode",
+          description: "How much autonomy this agent has over listing content",
+          options: ["Monitor Only", "Suggest Edits", "Auto-Execute"],
+          default: "Suggest Edits",
+        },
+        reviews: [
+          { id: "title", label: "Title rewrites", description: "Review any title change before it's published", default: true },
+          { id: "image", label: "Image swaps or reorders", description: "Approve image changes before they go live", default: true },
+          { id: "description", label: "Description edits", description: "Confirm long-form description changes", default: true },
+          { id: "attributes", label: "Attribute fixes", description: "Allow agent to fix missing or invalid attributes automatically", default: false },
+        ],
+      };
+    default:
+      return {
+        scope: {
+          label: "Operating Mode",
+          description: "How proactively this agent acts on your behalf",
+          options: ["Monitor Only", "Monitor & Recommend", "Auto-Execute"],
+          default: "Monitor & Recommend",
+        },
+        reviews: [
+          { id: "default-review", label: "Major changes", description: "Approve significant actions before they're applied", default: true },
+        ],
+      };
+  }
+}
+
 function AgentRulesView({ agent, onBack }: { agent: typeof MY_AGENTS[number]; onBack: () => void }) {
   const [backHovered, setBackHovered] = useState(false);
+  const [saveHovered, setSaveHovered] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const [requireReviewPriceChanges, setRequireReviewPriceChanges] = useState(true);
-  const [requireReviewBudget, setRequireReviewBudget] = useState(true);
-  const [requireReviewContent, setRequireReviewContent] = useState(false);
-  const [requireReviewCampaigns, setRequireReviewCampaigns] = useState(true);
-  const [notifyOnAnomalies, setNotifyOnAnomalies] = useState(true);
-  const [notifyOnCompletion, setNotifyOnCompletion] = useState(true);
-  const [taskScope, setTaskScope] = useState("Monitor & Recommend");
-  const [budgetLimit, setBudgetLimit] = useState("$100/day");
+  const config = useMemo(() => getAgentRulesConfig(agent.name), [agent.name]);
+
+  const [scope, setScope] = useState(config.scope.default);
+  const [limit, setLimit] = useState(config.limit?.default ?? "");
+  const [reviews, setReviews] = useState<Record<string, boolean>>(
+    () => Object.fromEntries(config.reviews.map(r => [r.id, r.default])),
+  );
+  const [channels, setChannels] = useState<string[]>(["inapp", "email"]);
+
+  const toggleReview = (id: string) => setReviews(prev => ({ ...prev, [id]: !prev[id] }));
+  const toggleChannel = (id: string) =>
+    setChannels(prev => (prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]));
 
   const handleSave = () => {
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
 
+  const sectionTitleStyle: React.CSSProperties = {
+    fontFamily: "'Lato', sans-serif",
+    fontSize: "12px",
+    lineHeight: "16px",
+    color: "#646266",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column", flex: 1, backgroundColor: "#FFFFFF", width: "100%", overflow: "hidden" }}>
-      {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center", gap: "10px",
-        padding: "12px 24px", borderBottom: "1px solid #D7D7D7",
-        flexShrink: 0, backgroundColor: "#FAFAFA",
-      }}>
+      {/* Header — matches TasksView */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          padding: "16px 24px 8px",
+          flexShrink: 0,
+          backgroundColor: "#FFFFFF",
+        }}
+      >
         <button
           onClick={onBack}
           onMouseEnter={() => setBackHovered(true)}
           onMouseLeave={() => setBackHovered(false)}
           style={{
-            display: "flex", alignItems: "center", justifyContent: "center",
-            width: "20px", height: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "28px",
+            height: "28px",
             border: "1px solid transparent",
             background: backHovered ? "#EEEEEE" : "none",
-            borderRadius: "6px", cursor: "pointer", padding: 0, margin: 0,
-            boxShadow: "none", flexShrink: 0, transition: "all 0.15s",
+            borderRadius: "6px",
+            cursor: "pointer",
+            padding: 0,
+            margin: 0,
+            boxShadow: "none",
+            flexShrink: 0,
+            transition: "all 0.15s",
             borderColor: backHovered ? "#D1D1D6" : "transparent",
           }}
         >
@@ -2096,97 +2647,152 @@ function AgentRulesView({ agent, onBack }: { agent: typeof MY_AGENTS[number]; on
             <path d="M10 12L6 8L10 4" stroke="#211e22" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </button>
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", fontWeight: "bold", lineHeight: "20px", color: "#211e22" }}>
-            Agent Rules
-          </span>
-          <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "14px", color: "#93939A" }}>
-            {agent.name}
-          </span>
+        <span
+          style={{
+            fontFamily: "'Lato', sans-serif",
+            fontSize: "var(--partnerhome-font-size-1000)",
+            fontWeight: "bold",
+            lineHeight: "20px",
+            color: "#211e22",
+          }}
+        >
+          Agent Rules
+        </span>
+      </div>
+
+      {/* Agent context strip */}
+      <div style={{ padding: "0 24px 16px", flexShrink: 0 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            padding: "10px 12px",
+            border: "1px solid #E5E5E7",
+            borderRadius: "8px",
+            backgroundColor: "#FAFAFA",
+          }}
+        >
+          <div
+            style={{
+              width: "32px",
+              height: "32px",
+              borderRadius: "50%",
+              backgroundColor: agent.color,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "11px", fontWeight: "bold", color: "#FFFFFF", lineHeight: "1" }}>
+              {agent.initials}
+            </span>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px", minWidth: 0 }}>
+            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "20px", color: "#211e22", fontWeight: "bold" }}>
+              {agent.name}
+            </span>
+            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#646266" }}>
+              Configure how this agent operates and when it asks for your input
+            </span>
+          </div>
         </div>
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflow: "auto", padding: "16px 24px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+      <div style={{ flex: 1, overflow: "auto", padding: "0 24px 24px", display: "flex", flexDirection: "column", gap: "24px" }}>
 
-        {/* Section: Task Scope */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", paddingLeft: "14px" }}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle cx="7" cy="7" r="5.5" stroke="#66256A" strokeWidth="1.3" />
-              <circle cx="7" cy="7" r="2" fill="#66256A" />
-            </svg>
-            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px", color: "#211e22", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-              Task Scope
-            </span>
+        {/* Section: Operating Boundaries */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <span style={sectionTitleStyle}>Operating Boundaries</span>
+          <div style={{ border: "1px solid #E5E5E7", borderRadius: "8px", padding: "4px", backgroundColor: "#FFFFFF" }}>
+            <SelectRow
+              label={config.scope.label}
+              description={config.scope.description}
+              value={scope}
+              options={config.scope.options}
+              onChange={setScope}
+            />
+            {config.limit && (
+              <>
+                <div style={{ height: "1px", backgroundColor: "#EFEFF1", margin: "0 14px" }} />
+                <SelectRow
+                  label={config.limit.label}
+                  description={config.limit.description}
+                  value={limit}
+                  options={config.limit.options}
+                  onChange={setLimit}
+                />
+              </>
+            )}
           </div>
-          <SelectRow
-            label="Operating Mode"
-            description="What level of autonomy this agent has"
-            value={taskScope}
-            options={["Monitor Only", "Monitor & Recommend", "Auto-Execute"]}
-            onChange={setTaskScope}
-          />
-          <SelectRow
-            label="Spending Limit"
-            description="Max budget the agent can commit per day"
-            value={budgetLimit}
-            options={["$25/day", "$50/day", "$100/day", "$500/day", "Unlimited"]}
-            onChange={setBudgetLimit}
-          />
         </div>
-
-        <div style={{ height: "1px", backgroundColor: "#E0D6E3" }} />
 
         {/* Section: Requires Your Review */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", paddingLeft: "14px" }}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 1.5V7L10 9" stroke="#66256A" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-              <circle cx="7" cy="7" r="5.5" stroke="#66256A" strokeWidth="1.3" />
-            </svg>
-            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px", color: "#211e22", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-              Requires Your Review
-            </span>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <span style={sectionTitleStyle}>Requires Your Review</span>
+          <div style={{ border: "1px solid #E5E5E7", borderRadius: "8px", padding: "4px", backgroundColor: "#FFFFFF" }}>
+            {config.reviews.map((r, i) => (
+              <div key={r.id}>
+                {i > 0 && <div style={{ height: "1px", backgroundColor: "#EFEFF1", margin: "0 14px" }} />}
+                <RuleRow
+                  label={r.label}
+                  description={r.description}
+                  enabled={!!reviews[r.id]}
+                  onToggle={() => toggleReview(r.id)}
+                />
+              </div>
+            ))}
           </div>
-          <RuleRow label="Price changes" description="Notify me before adjusting any product pricing" enabled={requireReviewPriceChanges} onToggle={() => setRequireReviewPriceChanges(v => !v)} />
-          <RuleRow label="Budget allocation" description="Ask approval before reallocating ad spend" enabled={requireReviewBudget} onToggle={() => setRequireReviewBudget(v => !v)} />
-          <RuleRow label="Content edits" description="Review title, image, or description changes" enabled={requireReviewContent} onToggle={() => setRequireReviewContent(v => !v)} />
-          <RuleRow label="Campaign creation" description="Approve new sponsored campaigns before launch" enabled={requireReviewCampaigns} onToggle={() => setRequireReviewCampaigns(v => !v)} />
         </div>
 
-        <div style={{ height: "1px", backgroundColor: "#E0D6E3" }} />
-
-        {/* Section: Notifications */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "6px", paddingLeft: "14px" }}>
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <path d="M7 1C4.79 1 3 2.79 3 5V7.5L1.5 10H12.5L11 7.5V5C11 2.79 9.21 1 7 1Z" stroke="#66256A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M5.5 10.5C5.5 11.33 6.17 12 7 12C7.83 12 8.5 11.33 8.5 10.5" stroke="#66256A" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px", color: "#211e22", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-              Notifications
+        {/* Section: Notification Channels */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <span style={sectionTitleStyle}>Notification Channels</span>
+          <div style={{ border: "1px solid #E5E5E7", borderRadius: "8px", padding: "14px", backgroundColor: "#FFFFFF", display: "flex", flexDirection: "column", gap: "12px" }}>
+            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#646266" }}>
+              Choose where this agent should reach you
             </span>
+            <NotificationChannels selected={channels} onToggle={toggleChannel} />
           </div>
-          <RuleRow label="Anomaly alerts" description="Get notified when the agent detects unusual patterns" enabled={notifyOnAnomalies} onToggle={() => setNotifyOnAnomalies(v => !v)} />
-          <RuleRow label="Task completion" description="Notify me when the agent finishes a task" enabled={notifyOnCompletion} onToggle={() => setNotifyOnCompletion(v => !v)} />
         </div>
       </div>
 
       {/* Save footer */}
       <div style={{
-        padding: "12px 24px", borderTop: "1px solid #D7D7D7",
-        flexShrink: 0, display: "flex", alignItems: "center", gap: "10px",
+        padding: "12px 24px 16px",
+        borderTop: "1px solid #EFEFF1",
+        flexShrink: 0,
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        backgroundColor: "#FFFFFF",
       }}>
         <button
           onClick={handleSave}
+          onMouseEnter={() => setSaveHovered(true)}
+          onMouseLeave={() => setSaveHovered(false)}
           style={{
-            flex: 1, padding: "10px", borderRadius: "8px", border: "none",
-            backgroundColor: saved ? "#2E7D32" : "#66256A", color: "#FFFFFF",
-            fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "16px",
-            fontWeight: "bold", cursor: "pointer", boxShadow: "none",
+            flex: 1,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+            height: "44px",
+            padding: "0 20px",
+            borderRadius: "6px",
+            border: "none",
+            backgroundColor: saved ? "#2E7D32" : (saveHovered ? "#7B189F" : "#66256A"),
+            color: "#FFFFFF",
+            fontFamily: "'Lato', 'Inter', sans-serif",
+            fontSize: "var(--partnerhome-font-size-1000)",
+            lineHeight: "20px",
+            fontWeight: "bold",
+            cursor: "pointer",
+            boxShadow: "none",
+            outline: "none",
             transition: "all 0.2s ease",
-            display: "flex", alignItems: "center", justifyContent: "center", gap: "6px",
           }}
         >
           {saved && (
@@ -2352,7 +2958,7 @@ function AgentCard({ agent, onTeachTask, onUpdateRules }: { agent: typeof MY_AGE
 function MyAgentsView({ onBack }: { onBack: () => void }) {
   const [backHovered, setBackHovered] = useState(false);
   const [exploreHovered, setExploreHovered] = useState(false);
-  const [teachingAgent, setTeachingAgent] = useState<string | null>(null);
+  const [teachingAgent, setTeachingAgent] = useState<typeof MY_AGENTS[number] | null>(null);
   const [rulesAgent, setRulesAgent] = useState<typeof MY_AGENTS[number] | null>(null);
 
   if (rulesAgent) {
@@ -2360,7 +2966,7 @@ function MyAgentsView({ onBack }: { onBack: () => void }) {
   }
 
   if (teachingAgent) {
-    return <TeachTaskView agentName={teachingAgent} onBack={() => setTeachingAgent(null)} />;
+    return <TeachTaskView agent={teachingAgent} onBack={() => setTeachingAgent(null)} />;
   }
 
   return (
@@ -2406,7 +3012,7 @@ function MyAgentsView({ onBack }: { onBack: () => void }) {
       {/* Agent Cards */}
       <div style={{ flex: 1, overflow: "auto", padding: "4px 24px 16px", display: "flex", flexDirection: "column", gap: "12px" }}>
         {MY_AGENTS.map((agent, idx) => (
-          <AgentCard key={idx} agent={agent} onTeachTask={() => setTeachingAgent(agent.name)} onUpdateRules={() => setRulesAgent(agent)} />
+          <AgentCard key={idx} agent={agent} onTeachTask={() => setTeachingAgent(agent)} onUpdateRules={() => setRulesAgent(agent)} />
         ))}
       </div>
 
@@ -2490,11 +3096,18 @@ function ConversationHistoryView({ onBack, onOpenWorkspace }: { onBack: () => vo
           </svg>
         </button>
         <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", fontWeight: "bold", lineHeight: "20px", color: "#211e22" }}>
-          Conversation History
+          Workspaces
         </span>
       </div>
 
-      <div style={{ flex: 1, overflow: "auto", padding: "16px 24px", display: "flex", flexDirection: "column", gap: "12px" }}>
+      {/* Subtext */}
+      <div style={{ padding: "0 24px 12px", flexShrink: 0 }}>
+        <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#646266", fontWeight: "normal" }}>
+          Intent-based, dynamic workspaces the assistant has created from your conversations.
+        </span>
+      </div>
+
+      <div style={{ flex: 1, overflow: "auto", padding: "4px 24px 16px", display: "flex", flexDirection: "column", gap: "12px" }}>
         <div
           onMouseEnter={() => setItemHovered(true)}
           onMouseLeave={() => setItemHovered(false)}
@@ -2507,21 +3120,12 @@ function ConversationHistoryView({ onBack, onOpenWorkspace }: { onBack: () => vo
             transition: "background-color 0.15s ease",
           }}
         >
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "8px" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: "4px", flex: 1 }}>
-              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "20px", color: "#211e22", fontWeight: "bold" }}>
-                "I have $1,000 to spend"
-              </span>
-              <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "18px", color: "#646266", fontWeight: "normal" }}>
-                {historySessionTime}
-              </span>
-            </div>
-            <span style={{
-              fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "14px",
-              fontWeight: "bold", color: "#2E7D32", backgroundColor: "#E8F5E9",
-              padding: "2px 8px", borderRadius: "10px", flexShrink: 0,
-            }}>
-              Active
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "20px", color: "#211e22", fontWeight: "bold" }}>
+              "I have $1,000 to spend"
+            </span>
+            <span style={{ fontFamily: "'Lato', sans-serif", fontSize: "13px", lineHeight: "18px", color: "#646266", fontWeight: "normal" }}>
+              {historySessionTime}
             </span>
           </div>
 
@@ -2531,12 +3135,12 @@ function ConversationHistoryView({ onBack, onOpenWorkspace }: { onBack: () => vo
             onMouseLeave={() => setBtnHovered(false)}
             style={{
               display: "flex", alignItems: "center", gap: "var(--partnerhome-spacing-1000)",
-              padding: "var(--partnerhome-spacing-1000) var(--partnerhome-spacing-2000)",
+              padding: "var(--partnerhome-spacing-1500) var(--partnerhome-spacing-2000)",
               borderRadius: "var(--partnerhome-radius-base)",
               border: "var(--partnerhome-stroke-weights-small) solid var(--partnerhome-border-color-primary)",
               backgroundColor: btnHovered ? "var(--partnerhome-surface-color-primarysubtle)" : "#FFFFFF",
               cursor: "pointer", transition: "all 0.15s ease",
-              fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-1000)", lineHeight: "var(--partnerhome-line-height-base)",
+              fontFamily: "'Lato', sans-serif", fontSize: "var(--partnerhome-font-size-500)", lineHeight: "var(--partnerhome-line-height-base)",
               fontWeight: "var(--partnerhome-font-weight-normal)", color: "var(--partnerhome-text-color-primary)", textAlign: "left",
               boxShadow: "none", width: "100%",
             }}
