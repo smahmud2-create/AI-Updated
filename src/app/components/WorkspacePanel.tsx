@@ -456,6 +456,7 @@ const WORKSPACE_INITIAL_PRODUCTS: WorkspaceProductRow[] = [
     uniqueVisits: 3820,
     salesTrend: -12.3,
     price: 249,
+    inventory: 124,
     image:
       "https://images.unsplash.com/photo-1761849450843-4ce9e6560b94?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b3ZlbiUyMGFyZWElMjBydWclMjB0ZXh0aWxlJTIwcGF0dGVybnxlbnwxfHx8fDE3NzM3NjA2NTJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
   },
@@ -470,6 +471,7 @@ const WORKSPACE_INITIAL_PRODUCTS: WorkspaceProductRow[] = [
     uniqueVisits: 2290,
     salesTrend: -8.5,
     price: 29,
+    inventory: 892,
     image:
       "https://images.unsplash.com/photo-1602143407151-7111542de6e8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzdGFpbmxlc3MlMjBzdGVlbCUyMHdhdGVyJTIwYm90dGxlJTIwcHJvZHVjdHxlbnwxfHx8fDE3NzM3NTQzMjh8MA&ixlib=rb-4.1.0&q=80&w=1080",
   },
@@ -484,6 +486,7 @@ const WORKSPACE_INITIAL_PRODUCTS: WorkspaceProductRow[] = [
     uniqueVisits: 2524,
     salesTrend: -18.7,
     price: 39,
+    inventory: 48,
     image:
       "https://images.unsplash.com/photo-1698746043955-42b03ddedfcb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb3R0b24lMjBwaWxsb3clMjBjYXNlcyUyMGJlZGRpbmd8ZW58MXx8fHwxNzczNzU5OTUwfDA&ixlib=rb-4.1.0&q=80&w=1080",
   },
@@ -498,6 +501,7 @@ const WORKSPACE_INITIAL_PRODUCTS: WorkspaceProductRow[] = [
     uniqueVisits: 3882,
     salesTrend: -5.2,
     price: 59,
+    inventory: 312,
     image:
       "https://images.unsplash.com/photo-1766411503497-911658181192?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxMRUQlMjBkZXNrJTIwbGFtcCUyMHByb2R1Y3R8ZW58MXx8fHwxNzczNzU5OTUxfDA&ixlib=rb-4.1.0&q=80&w=1080",
   },
@@ -619,6 +623,7 @@ export function WorkspacePanel({ onClose, onCardCompleted }: WorkspacePanelProps
           uniqueVisits: 100,
           salesTrend: 0,
           price: 49,
+          inventory: 50,
           image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&q=80",
         },
       ];
@@ -1162,7 +1167,7 @@ export function WorkspacePanel({ onClose, onCardCompleted }: WorkspacePanelProps
             <table
               style={{
                 width: "100%",
-                minWidth: isUpdatingProducts ? "1092px" : "1040px",
+                minWidth: isUpdatingProducts ? "1192px" : "1140px",
                 borderCollapse: "collapse",
                 fontFamily: "var(--partnerhome-font-family-base)",
               }}
@@ -1211,6 +1216,7 @@ export function WorkspacePanel({ onClose, onCardCompleted }: WorkspacePanelProps
                   >
                     Product
                   </th>
+                  <th style={{ ...numericColumnHeaderStyle, width: "100px" }}>Inventory</th>
                   <th style={{ ...numericColumnHeaderStyle, width: "110px" }}>Sales trend</th>
                   <th style={{ ...numericColumnHeaderStyle, width: "110px" }}>Units sold</th>
                   <th style={{ ...numericColumnHeaderStyle, width: "120px" }}>Conversion rate</th>
@@ -1311,6 +1317,20 @@ export function WorkspacePanel({ onClose, onCardCompleted }: WorkspacePanelProps
                           </p>
                         </div>
                       </div>
+                    </td>
+                    <td
+                      style={{
+                        padding: "0 var(--partnerhome-spacing-2000)",
+                        height: "56px",
+                        textAlign: "right",
+                        fontSize: "var(--partnerhome-font-size-1000)",
+                        fontWeight: "var(--partnerhome-font-weight-normal)",
+                        color: "var(--partnerhome-text-color-base)",
+                        fontFamily: "var(--partnerhome-font-family-base)",
+                        verticalAlign: "middle",
+                      }}
+                    >
+                      {product.inventory.toLocaleString()}
                     </td>
                     <td
                       style={{

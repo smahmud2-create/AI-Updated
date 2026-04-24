@@ -20,6 +20,8 @@ export interface Product {
   uniqueVisits: number;
   salesTrend: number;
   price: number;
+  /** On-hand units available to sell */
+  inventory: number;
   image: string;
 }
 
